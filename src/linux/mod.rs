@@ -70,7 +70,7 @@ impl DeviceState {
         }
     }
 
-    pub fn query_keymap(&self, keycode_buf: &mut Vec<Keycode>) -> Vec<Keycode> {
+    pub fn query_keymap(&self, keycode_buf: &mut Vec<Keycode>) {
         keycode_buf.clear();
         unsafe {
             let keymap: *mut i8 = [0; 32].as_mut_ptr();
@@ -92,7 +92,6 @@ impl DeviceState {
                 }
             }
         }
-        keycodes
     }
 
     fn kernel_key_to_keycode(&self, kernel_code: u8) -> Option<Keycode> {
