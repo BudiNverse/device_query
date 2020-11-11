@@ -3,13 +3,16 @@ extern crate device_query;
 use device_query::{DeviceQuery, DeviceState};
 
 fn main() {
-    let device_state = DeviceState::new();
+    let mut device_state = DeviceState::new();
     let mut prev_keys = vec![];
+    let mut keycodes = vec![];
     loop {
-        let keys = device_state.get_keys();
-        if keys != prev_keys {
-            println!("{:?}", keys);
+        device_state.get_keys(&mut keycodes);
+        if keycodes != prev_keys {
+            println!("{:?}", &keycodes);
         }
-        prev_keys = keys;
+
+        prev_keys.clear();
+        prev_keys.extend_from_slice(&keycodes);
     }
 }
