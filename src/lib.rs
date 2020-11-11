@@ -10,7 +10,7 @@
 //!
 //! let mut keycodes = vec![];
 //! device_state.get_keys(&mut keycodes);
-//! println!("Is A pressed? {}", keys.contains(&Keycode::A));
+//! println!("Is A pressed? {}", keycodes.contains(&Keycode::A));
 //! ```
 
 pub mod keymap;
