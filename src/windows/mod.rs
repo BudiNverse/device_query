@@ -6,11 +6,15 @@ use windows::winapi::shared::windef::POINT;
 use windows::winapi::um::winuser;
 use windows::winapi::um::winuser::{GetAsyncKeyState, GetCursorPos};
 
-pub struct DeviceState;
+pub struct DeviceState {
+    _internal_keymap_buf: Vec<i16>
+}
 
 impl DeviceState {
     pub fn new() -> DeviceState {
-        DeviceState {}
+        DeviceState {
+            _internal_keymap_buf: Vec::with_capacity(256)
+        }
     }
 
     pub fn query_pointer(&self) -> MouseState {
@@ -51,21 +55,18 @@ impl DeviceState {
         }
     }
 
-    pub fn query_keymap(
-        &self,
-        (keycode_buf, keymap_buf): (&mut Vec<Keycode>, &mut Vec<i16>),
-    ) {
+    pub fn query_keymap(&mut self, keycode_buf: &mut Vec<Keycode>) {
         // clear buffers
         keycode_buf.clear();
-        keymap_buf.clear();
+        self._internal_keymap_buf.clear();
 
         unsafe {
             for key in 0..256 {
-                keymap_buf.push(GetAsyncKeyState(key));
+                self._internal_keymap_buf.push(GetAsyncKeyState(key));
             }
         }
 
-        for (ix, byte) in keymap_buf.iter().enumerate() {
+        for (ix, byte) in self._internal_keymap_buf.iter().enumerate() {
             if *byte as u32 & 0x8000 != 0 {
                 match self.win_key_to_keycode(ix as i32) {
                     Some(k) => keycode_buf.push(k),

@@ -109,6 +109,7 @@ impl DeviceState {
         }
     }
     pub fn query_keymap(&self, keycode_buf: &mut Vec<Keycode>) {
+        keycode_buf.clear();
         for (_, to) in MAPPING.iter().filter(|(from, _)| from.is_pressed()) {
             keycode_buf.push(*to);
         }
