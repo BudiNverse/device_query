@@ -2,9 +2,9 @@ extern crate winapi;
 
 use keymap::Keycode;
 use mouse_state::MouseState;
-use windows::winapi::um::winuser::{GetAsyncKeyState, GetCursorPos};
 use windows::winapi::shared::windef::POINT;
 use windows::winapi::um::winuser;
+use windows::winapi::um::winuser::{GetAsyncKeyState, GetCursorPos};
 
 pub struct DeviceState;
 
@@ -39,8 +39,8 @@ impl DeviceState {
                 GetAsyncKeyState(winuser::VK_XBUTTON2) as u32 & 0x8000 != 0;
         }
         MouseState {
-            coords: coords,
-            button_pressed: vec![
+            coords,
+            button_pressed: [
                 false,
                 button1pressed,
                 button2pressed,
@@ -51,23 +51,28 @@ impl DeviceState {
         }
     }
 
-    pub fn query_keymap(&self) -> Vec<Keycode> {
-        let mut keycodes = vec![];
-        let mut keymap = vec![];
+    pub fn query_keymap(
+        &self,
+        (keycode_buf, keymap_buf): (&mut Vec<Keycode>, &mut Vec<i16>),
+    ) {
+        // clear buffers
+        keycode_buf.clear();
+        keymap_buf.clear();
+
         unsafe {
             for key in 0..256 {
-                keymap.push(GetAsyncKeyState(key));
+                keymap_buf.push(GetAsyncKeyState(key));
             }
         }
-        for (ix, byte) in keymap.iter().enumerate() {
+
+        for (ix, byte) in keymap_buf.iter().enumerate() {
             if *byte as u32 & 0x8000 != 0 {
                 match self.win_key_to_keycode(ix as i32) {
-                    Some(k) => keycodes.push(k),
+                    Some(k) => keycode_buf.push(k),
                     None => (),
                 }
             }
         }
-        keycodes
     }
 
     fn win_key_to_keycode(&self, win_key: i32) -> Option<Keycode> {

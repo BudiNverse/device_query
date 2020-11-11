@@ -95,11 +95,12 @@ impl DeviceState {
 
     pub fn query_pointer(&self) -> MouseState {
         let (x, y) = readmouse::Mouse::location();
-        let button_pressed = vec![
+        let button_pressed = [
             false,
             readmouse::Mouse::Left.is_pressed(),
             readmouse::Mouse::Right.is_pressed(),
             readmouse::Mouse::Center.is_pressed(),
+            false,
             false,
         ];
         MouseState {
@@ -107,11 +108,9 @@ impl DeviceState {
             button_pressed,
         }
     }
-    pub fn query_keymap(&self) -> Vec<Keycode> {
-        MAPPING
-            .iter()
-            .filter(|(from, _)| from.is_pressed())
-            .map(|(_, to)| to.clone())
-            .collect()
+    pub fn query_keymap(&self, keycode_buf: &mut Vec<Keycode>) {
+        for (_, to) in MAPPING.iter().filter(|(from, _)| from.is_pressed()) {
+            keycode_buf.push(*to);
+        }
     }
 }

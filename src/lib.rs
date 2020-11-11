@@ -31,19 +31,28 @@ mod macos;
 #[cfg(target_os = "macos")]
 pub use macos::DeviceState;
 
-pub trait DeviceQuery {
+pub trait DeviceQuery<'a, 'b> {
+    type Buffers;
+
     fn get_mouse(&self) -> MouseState;
-    fn get_keys(&self) -> Vec<Keycode>;
+    fn get_keys(&self, buffers: Self::Buffers);
 }
 
-impl DeviceQuery for DeviceState {
+impl<'a, 'b> DeviceQuery<'a,'b> for DeviceState {
+    #[cfg(target_os = "windows")]
+    type Buffers = (&'a mut Vec<Keycode>, &'b mut Vec<i16>);
+    #[cfg(target_os = "linux")]
+    type Buffers = &'a mut Vec<Keycode>;
+    #[cfg(target_os = "macos")]
+    type Buffers = &'a mut Vec<Keycode>;
+
     /// Query for the current mouse position and mouse button state.
     fn get_mouse(&self) -> MouseState {
         self.query_pointer()
     }
 
     /// Query for all keys that are currently pressed down.
-    fn get_keys(&self) -> Vec<Keycode> {
-        self.query_keymap()
+    fn get_keys(&self, buffers: Self::Buffers) {
+        self.query_keymap(buffers);
     }
 }

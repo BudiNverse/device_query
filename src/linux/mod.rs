@@ -56,7 +56,7 @@ impl DeviceState {
 
         // Use 1-based indexing here so people can just query the button
         // number they're interested in directly.
-        let button_pressed = vec![
+        let button_pressed = [
             false,
             button1pressed,
             button2pressed,
@@ -70,8 +70,8 @@ impl DeviceState {
         }
     }
 
-    pub fn query_keymap(&self) -> Vec<Keycode> {
-        let mut keycodes = vec![];
+    pub fn query_keymap(&self, keycode_buf: &mut Vec<Keycode>) -> Vec<Keycode> {
+        keycode_buf.clear();
         unsafe {
             let keymap: *mut i8 = [0; 32].as_mut_ptr();
             xlib::XQueryKeymap(self.display, keymap);
@@ -86,7 +86,7 @@ impl DeviceState {
                         let kernel_key = x11_key - 8;
                         if let Some(k) = self.kernel_key_to_keycode(kernel_key)
                         {
-                            keycodes.push(k)
+                            keycode_buf.push(k)
                         }
                     }
                 }
